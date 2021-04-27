@@ -1,0 +1,52 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Build
+
+on: push
+
+jobs:
+
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Build package
+        run: |
+          pyinstaller -F --windowed build-win.spec
+      - uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: Windows
+          path: dist/GooeyExample.exe
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Build package 
+        run: |
+          pyinstaller -F --windowed build-osx.spec
+          cd dist
+          hdiutil create ./GooeyExample.dmg -srcfolder GooeyExample.app -ov
+      - uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: MacOS
+          path: dist/GooeyExample.dmg
